@@ -568,3 +568,16 @@ test with ldapserach
 ```
 ldapsearch -W -D "cn=admin,dc=field,dc=hortonworks,dc=com" -b "dc=field,dc=hortonworks,dc=com"
 ```
+About this LDAP directory
+search base is
+```
+dc=field,dc=hortonworks,dc=com
+```
+All test users are inside this container and it could be used as user search base as well
+```
+ou=Users,dc=field,dc=hortonworks,dc=com
+```
+All groups are inside this container and it could be used as group search base as well
+```
+ou=Groups,dc=field,dc=hortonworks,dc=com
+```

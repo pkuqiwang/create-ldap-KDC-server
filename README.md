@@ -1,10 +1,15 @@
-# create-ldap-KDC-server
+# create openLDAP KDC server
 
 this guide provide a step-by-step instruction on how to creare a openLDAP and MIT KDC environment on centOS 7 for testing HDP security and governance features.
 
 ###Pre-install
-First enable root user on this server which is disabled by default. And install pre-requisits on the server. 
-rng-tools help to generate radnom operation which is used by MIT KDC to initilize the database.
+First enable root user on this server which is disabled by default. 
+```
+sudo vi /root/.ssh/authorized_keys
+--uncommented PermitRootLogin yes
+sudo vi /etc/ssh/sshd_config
+```
+Install pre-requisits on the server. rng-tools help to generate radnom operation which is used by MIT KDC to initilize the database.
 
 ```
 yum -y install wget ntp firewalld git httpd openssl rng-tools
@@ -21,7 +26,7 @@ modify selinux config to disable it
 
 ```
 vi /etc/selinux/config
-
+--change the following line
 SELINUX=disabled
 ```
 Disable transparent huge page
@@ -40,7 +45,7 @@ modify krb5.conf file so it contains you realm name as well as the server name
 ```
 vi /etc/krb5.conf
 ```
-Below is modfiied krb5.conf which could be used as a reference
+Below is modfiied krb5.conf 
 ```
 [logging]
  default = FILE:/var/log/krb5libs.log
@@ -70,7 +75,7 @@ Next update kdc.conf
 ```
 vi /var/kerberos/krb5kdc/kdc.conf
 ```
-Here is updated kdc.conf 
+Here is modified kdc.conf 
 ```
 [kdcdefaults]
  kdc_ports = 88
@@ -85,7 +90,7 @@ Here is updated kdc.conf
   supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal camellia256-cts:normal camellia128-cts:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
  }
 ```
-Set the administrators in kadm5.acl for this KDC server
+Set the administrators in kadm5.acl 
 ```
 vi /var/kerberos/krb5kdc/kadm5.acl
 ```
@@ -95,29 +100,46 @@ kadm5.acl after update
 administrator@FIELD.HORTONWORKS.COM     *
 hadoopadmin@FIELD.HORTONWORKS.COM       *
 rangeradmin@FIELD.HORTONWORKS.COM       *
-create the database for KDC server
 ```
 Next create KDC database. This will take very long time without rng-tools. Make sure you note down the password 
 ```
 kdb5_util create -s -r FIELD.HORTONWORKS.COM
 ```
-restart KDC server and kadmin
+restart KDC server and kadmin and confirm both are running before proceed to next step
 ```
 systemctl enable krb5kdc kadmin
 systemctl start krb5kdc kadmin
 systemctl status krb5kdc
 systemctl status kadmin
 ```
-Then add admin for KDC server and restart the server
+Add principles for admin and test users to KDC. You must run this under root
 ```
 kadmin.local 
 ```
-Inside kadmin console, add admin principles adn note down the passwords. You should see the newly created principle with listprincs
+Inside kadmin console, add admin principles and test users with default password as "passwords" (change this if you want to sue other password). You should see the newly created principles with listprincs
 ```
-addprinc admin/admin
-addprinc rangeradmin
-addprinc administrator
-addprinc hadoopadmin
+addprinc -pw password admin/admin
+addprinc -pw password administrator
+addprinc -pw password hadoopadmin
+addprinc -pw password mktg1
+addprinc -pw password mktg2
+addprinc -pw password mktg3
+addprinc -pw password hr1
+addprinc -pw password hr2
+addprinc -pw password hr3
+addprinc -pw password legal1
+addprinc -pw password legal2
+addprinc -pw password legal3
+addprinc -pw password finance1
+addprinc -pw password finance2
+addprinc -pw password finance3
+addprinc -pw password sales1
+addprinc -pw password sales2
+addprinc -pw password sales3
+addprinc -pw password ali
+addprinc -pw password rangeradmin
+addprinc -pw password xapolicymgr
+
 listprincs
 quit
 ```
@@ -125,7 +147,6 @@ then restart KDC and kadmin
 ```
 systemctl restart krb5kdc kadmin
 ```
-
 make sure you can run kadmin with created admin users 
 ```
 kadmin -p admin/admin
@@ -136,7 +157,7 @@ kadmin -p administrator
 This concludes the installation of MIT KDC server.
 
 ###Install openLDAP server and create test users/groups
-Install openLDAP and supported components
+yum install openLDAP and supported components
 ```
 yum -y install openldap-servers openldap-clients krb5-server-ldap epel-release
 
@@ -148,7 +169,8 @@ systemctl start slapd
 ```
 Records the hashed password from the following command
 ```
-slappasswd 
+slappasswd
+note this down: {SSHA}E+Vgldng4xOrWfqfwOBAfdUSWkV/zWt3
 ```
 create chrootpw.ldif with following content
 ```
@@ -157,10 +179,9 @@ changetype: modify
 replace: olcRootPW
 olcRootPW: {SSHA}E+Vgldng4xOrWfqfwOBAfdUSWkV/zWt3
 ```
-And update the root password and load few schemas
+And update the root password and load schemas
 ```
 ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif 
-
 ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
 ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
 ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
@@ -497,7 +518,6 @@ uidNumber: 75000025
 gidNumber: 75000005
 userPassword:hortonworks
 
-
 dn: uid=rangeradmin,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
 objectclass:person
@@ -511,7 +531,6 @@ homedirectory:/home/rangeradmin
 uidNumber: 75000026
 gidNumber: 75000006
 userPassword:hortonworks
-
 
 dn: uid=xapolicymgr,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -569,6 +588,10 @@ test with ldapserach
 ldapsearch -W -D "cn=admin,dc=field,dc=hortonworks,dc=com" -b "dc=field,dc=hortonworks,dc=com"
 ```
 About this LDAP directory
+LDAP url
+```
+ldap://qwang-kdc-ldap.field.hortonworks.com:389
+```
 search base is
 ```
 dc=field,dc=hortonworks,dc=com
@@ -581,3 +604,8 @@ All groups are inside this container and it could be used as group search base a
 ```
 ou=Groups,dc=field,dc=hortonworks,dc=com
 ```
+bind user/Manager DN
+```
+cn=admin,dc=field,dc=hortonworks,dc=com
+```
+This concludes the installation of openLDAP server

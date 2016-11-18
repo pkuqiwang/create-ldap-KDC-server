@@ -97,7 +97,6 @@ vi /var/kerberos/krb5kdc/kadm5.acl
 kadm5.acl after update
 ```
 */admin@FIELD.HORTONWORKS.COM   *
-administrator@FIELD.HORTONWORKS.COM     *
 hadoopadmin@FIELD.HORTONWORKS.COM       *
 rangeradmin@FIELD.HORTONWORKS.COM       *
 ```
@@ -119,8 +118,6 @@ kadmin.local
 Inside kadmin console, add admin principles and test users with default password as "passwords" (change this if you want to sue other password). You should see the newly created principles with listprincs
 ```
 addprinc -pw password admin/admin
-addprinc -pw password administrator
-addprinc -pw password hadoopadmin
 addprinc -pw password mktg1
 addprinc -pw password mktg2
 addprinc -pw password mktg3
@@ -139,6 +136,7 @@ addprinc -pw password sales3
 addprinc -pw password ali
 addprinc -pw password rangeradmin
 addprinc -pw password xapolicymgr
+addprinc -pw password hadoopadmin
 
 listprincs
 quit
@@ -543,6 +541,20 @@ sn: Manager
 uid: xapolicymgr
 homedirectory:/home/xapolicymgr
 uidNumber: 75000027
+gidNumber: 75000006
+userPassword:hortonworks
+
+dn: uid=hadoopadmin,ou=Users,dc=field,dc=hortonworks,dc=com
+objectclass:top
+objectclass:person
+objectclass:organizationalPerson
+objectclass:inetOrgPerson
+objectclass:posixaccount
+cn: Ranger
+sn: Admin
+uid: hadoopadmin
+homedirectory:/home/rangeradmin
+uidNumber: 75000028
 gidNumber: 75000006
 userPassword:hortonworks
 ```

@@ -563,6 +563,7 @@ userPassword:password
 Create users and groups for testing
 ```
 ldapadd -x -D cn=admin,dc=field,dc=hortonworks,dc=com -W -f domainanduser.ldif
+Enter LDAP Password:--this is the password entered earlier for slappasswd
 ```
 
 Next we will enable ldaps://
@@ -590,6 +591,8 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f mod_ssl.ldif
 ```
 Update /etc/sysconfig/slapd so ldaps:// is enabled
 ```
+vi /etc/sysconfig/slapd
+--make change to the following
 SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
 ```
 restart sladp
@@ -605,6 +608,7 @@ About this LDAP directory
 LDAP url
 ```
 ldap://qwang-kdc-ldap.field.hortonworks.com:389
+Enter LDAP Password:
 ```
 search base is
 ```
@@ -636,6 +640,7 @@ systemctl start mysqld.service
 Login into MySQL (password is empty) and create schemas and users needed by HDP
 ```
 mysql -u root -p
+Enter password:--empty password
 
 CREATE USER 'ambari'@'localhost' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'localhost';

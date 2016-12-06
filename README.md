@@ -7,7 +7,7 @@ The part provide a step-by-step instruction on how to creare a openLDAP, MIT KDC
 First enable root user on centOS VM which is disabled by default. 
 ```
 sudo vi /root/.ssh/authorized_keys
---make ssh key available
+--make ssh key available, delete everything before ssh-rsa
 
 sudo vi /etc/ssh/sshd_config
 PermitRootLogin yes

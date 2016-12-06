@@ -1,13 +1,16 @@
 # create openLDAP KDC server
+This guide is the first step of a serie to setup a secured HDP cluster with integrated Ranger and Atlas enabled. It gives you the ability to test all security and governance features in HDP stacks. 
 
-this guide provide a step-by-step instruction on how to creare a openLDAP and MIT KDC environment on centOS 7 for testing HDP security and governance features.
+The part provide a step-by-step instruction on how to creare a openLDAP, MIT KDC and MySQL (optional) environment on centOS 7 VM for testing HDP security and governance features. It assumes you have a centOS 7 VM with minimum of 4GB memory.
 
 ###Pre-install
-First enable root user on this server which is disabled by default. 
+First enable root user on centOS VM which is disabled by default. 
 ```
 sudo vi /root/.ssh/authorized_keys
---uncommented PermitRootLogin yes
+PermitRootLogin yes
+
 sudo vi /etc/ssh/sshd_config
+--make ssh key available
 ```
 Install pre-requisits on the server. rng-tools help to generate radnom operation which is used by MIT KDC to initilize the database.
 
@@ -104,7 +107,7 @@ Next create KDC database. This will take very long time without rng-tools. Make 
 ```
 kdb5_util create -s -r FIELD.HORTONWORKS.COM
 ```
-restart KDC server and kadmin and confirm both are running before proceed to next step
+Restart KDC server and kadmin and confirm both are running before proceed to next step
 ```
 systemctl enable krb5kdc kadmin
 systemctl start krb5kdc kadmin
@@ -150,7 +153,6 @@ make sure you can run kadmin with created admin users
 kadmin -p admin/admin
 kadmin -p rangeradmin
 kadmin -p hadoopadmin
-kadmin -p administrator
 ```
 This concludes the installation of MIT KDC server.
 
@@ -168,7 +170,7 @@ systemctl start slapd
 Records the hashed password from the following command
 ```
 slappasswd
-note this down: {SSHA}E+Vgldng4xOrWfqfwOBAfdUSWkV/zWt3
+note this down and use in later steps: {SSHA}E+Vgldng4xOrWfqfwOBAfdUSWkV/zWt3
 ```
 create chrootpw.ldif with following content
 ```
@@ -304,7 +306,7 @@ uid: ali
 homedirectory:/home/ali
 uidNumber: 75000010
 gidNumber: 75000005
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=mktg1,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -318,7 +320,7 @@ uid: mktg1
 homedirectory:/home/mktg1
 uidNumber: 75000011
 gidNumber: 75000001
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=mktg2,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -332,7 +334,7 @@ uid: mktg2
 homedirectory:/home/mktg2
 uidNumber: 75000012
 gidNumber: 75000001
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=mktg3,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -346,7 +348,7 @@ uid: mktg3
 homedirectory:/home/mktg3
 uidNumber: 75000013
 gidNumber: 75000001
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=hr1,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -360,7 +362,7 @@ uid: hr1
 homedirectory:/home/hr1
 uidNumber: 75000014
 gidNumber: 75000002
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=hr2,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -374,7 +376,7 @@ uid: hr2
 homedirectory:/home/hr2
 uidNumber: 75000015
 gidNumber: 75000002
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=hr3,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -388,7 +390,7 @@ uid: hr3
 homedirectory:/home/hr3
 uidNumber: 75000016
 gidNumber: 75000002
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=legal1,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -402,7 +404,7 @@ uid: legal1
 homedirectory:/home/legal1
 uidNumber: 75000017
 gidNumber: 75000003
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=legal2,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -416,7 +418,7 @@ uid: legal2
 homedirectory:/home/legal2
 uidNumber: 75000018
 gidNumber: 75000003
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=legal3,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -430,7 +432,7 @@ uid: legal3
 homedirectory:/home/legal3
 uidNumber: 75000019
 gidNumber: 75000003
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=finance1,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -444,7 +446,7 @@ sn: Smith
 homedirectory:/home/finance1
 uidNumber: 75000020
 gidNumber: 75000004
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=finance2,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -458,7 +460,7 @@ uid: finance2
 homedirectory:/home/finance2
 uidNumber: 75000021
 gidNumber: 75000004
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=finance3,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -472,7 +474,7 @@ uid: finance3
 homedirectory:/home/finance3
 uidNumber: 75000022
 gidNumber: 75000004
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=sales1,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -486,7 +488,7 @@ uid: sales1
 homedirectory:/home/sales1
 uidNumber: 75000023
 gidNumber: 75000005
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=sales2,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -500,7 +502,7 @@ uid: sales2
 homedirectory:/home/sales2
 uidNumber: 75000024
 gidNumber: 75000005
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=sales3,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -514,7 +516,7 @@ uid: sales3
 homedirectory:/home/sales3
 uidNumber: 75000025
 gidNumber: 75000005
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=rangeradmin,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -528,7 +530,7 @@ uid: rangeradmin
 homedirectory:/home/rangeradmin
 uidNumber: 75000026
 gidNumber: 75000006
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=xapolicymgr,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -542,7 +544,7 @@ uid: xapolicymgr
 homedirectory:/home/xapolicymgr
 uidNumber: 75000027
 gidNumber: 75000006
-userPassword:hortonworks
+userPassword:password
 
 dn: uid=hadoopadmin,ou=Users,dc=field,dc=hortonworks,dc=com
 objectclass:top
@@ -556,7 +558,7 @@ uid: hadoopadmin
 homedirectory:/home/rangeradmin
 uidNumber: 75000028
 gidNumber: 75000006
-userPassword:hortonworks
+userPassword:password
 ```
 Create users and groups for testing
 ```
@@ -565,7 +567,7 @@ ldapadd -x -D cn=admin,dc=field,dc=hortonworks,dc=com -W -f domainanduser.ldif
 
 Next we will enable ldaps://
 ```
-openssl req -x509 -newkey rsa:4096 -keyout /etc/pki/tls/private/openldap.key -out /etc/pki/tls/certs/openldap.crt -days 3650 -nodes -subj "/CN=qwang-util.field.hortonworks.com"
+openssl req -x509 -newkey rsa:4096 -keyout /etc/pki/tls/private/openldap.key -out /etc/pki/tls/certs/openldap.crt -days 3650 -nodes -subj "/CN=qwang-kdc-ldap.field.hortonworks.com"
 cp /etc/pki/tls/private/openldap.key /etc/pki/tls/certs/openldap.crt /etc/pki/tls/certs/ca-bundle.crt /etc/openldap/certs/ 
 chown ldap. /etc/openldap/certs/openldap.key /etc/openldap/certs/openldap.crt /etc/openldap/certs/ca-bundle.crt
 ```
@@ -621,3 +623,51 @@ bind user/Manager DN
 cn=admin,dc=field,dc=hortonworks,dc=com
 ```
 This concludes the installation of openLDAP server
+
+###Install MySQL server
+Get MySQL repo and yum install MySQL
+```
+wget http://repo.mysql.com/mysql-community-release-el7.rpm
+rpm -ivh mysql-community-release-el7.rpm
+yum -y install mysql mysql-server mysql-libs mysql-connector-java*
+systemctl enable mysqld.service
+systemctl start mysqld.service
+```
+Login into MySQL (password is empty) and create schemas and users needed by HDP
+```
+mysql -u root -p
+
+CREATE USER 'ambari'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'localhost';
+CREATE USER 'ambari'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'ambari'@'%';
+FLUSH PRIVILEGES;
+CREATE DATABASE ambari;
+
+CREATE USER 'hive'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'hive'@'localhost';
+CREATE USER 'hive'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'hive'@'%';
+FLUSH PRIVILEGES;
+CREATE DATABASE hive;
+
+CREATE USER 'oozie'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'oozie'@'%';
+FLUSH PRIVILEGES;
+CREATE DATABASE oozie;
+
+CREATE USER 'rangerdba'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'localhost';
+CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+EXIT;
+
+```
+After Ambari installation, copy the schema over and apply to MySQL
+```
+mysql -u root -p ambari < /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
+```

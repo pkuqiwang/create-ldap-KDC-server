@@ -7,10 +7,10 @@ The part provide a step-by-step instruction on how to creare a openLDAP, MIT KDC
 First enable root user on centOS VM which is disabled by default. 
 ```
 sudo vi /root/.ssh/authorized_keys
-PermitRootLogin yes
+--make ssh key available
 
 sudo vi /etc/ssh/sshd_config
---make ssh key available
+PermitRootLogin yes
 ```
 Install pre-requisits on the server. rng-tools help to generate radnom operation which is used by MIT KDC to initilize the database.
 
